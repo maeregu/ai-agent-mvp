@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amharic-English Transcription Agent</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace">
+        <div class="panel upload-panel">
+          <div>
+            <p class="eyebrow">MVP</p>
+            <h1>Amharic-English transcription</h1>
+            <p class="subtle">Upload audio or video and receive a transcript plus optional translation.</p>
+          </div>
+
+          <form id="uploadForm" class="form">
+            <label class="field">
+              <span>Media file</span>
+              <input id="fileInput" name="file" type="file" accept="audio/*,video/*" required />
+            </label>
+
+            <label class="field">
+              <span>Translation target</span>
+              <select id="targetLanguage" name="target_language">
+                <option value="en">English</option>
+                <option value="am">Amharic</option>
+                <option value="none">No translation</option>
+              </select>
+            </label>
+
+            <button id="submitButton" type="submit">Start transcription</button>
+          </form>
+        </div>
+
+        <div class="panel result-panel">
+          <div class="status-row">
+            <div>
+              <p class="eyebrow">Job Status</p>
+              <h2 id="statusText">Ready</h2>
+            </div>
+            <div class="actions">
+              <a id="shortVideoLink" class="download secondary hidden" href="#" target="_blank">Short video</a>
+              <a id="downloadLink" class="download hidden" href="#" target="_blank">Text</a>
+            </div>
+          </div>
+
+          <div id="errorBox" class="error hidden"></div>
+          <div id="highlightBox" class="highlight hidden"></div>
+
+          <label class="output-block">
+            <span>Transcript</span>
+            <textarea id="transcriptOutput" readonly placeholder="Transcript will appear here."></textarea>
+          </label>
+
+          <label class="output-block">
+            <span>Translation</span>
+            <textarea id="translationOutput" readonly placeholder="Translation will appear here."></textarea>
+          </label>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+
