@@ -18,16 +18,18 @@ def generate_short_clip(
     job_id: str,
     start_seconds: float = 0,
     end_seconds: float | None = None,
+    clip_index: int = 1,
+    duration_seconds: int | None = None,
 ) -> Path | None:
     if not is_video_file(source_path):
         return None
     if shutil.which("ffmpeg") is None:
         raise RuntimeError("FFmpeg is required to generate short video clips.")
 
-    duration = int(os.getenv("SHORT_CLIP_SECONDS", str(SHORT_CLIP_SECONDS)))
+    duration = duration_seconds or int(os.getenv("SHORT_CLIP_SECONDS", str(SHORT_CLIP_SECONDS)))
     if end_seconds is not None:
         duration = max(3, min(duration, int(round(end_seconds - start_seconds))))
-    output_path = OUTPUT_DIR / f"{job_id}_short.mp4"
+    output_path = OUTPUT_DIR / f"{job_id}_short_{clip_index}.mp4"
 
     creationflags = 0
     if sys.platform == "win32":

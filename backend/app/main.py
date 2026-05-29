@@ -8,20 +8,29 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import (
     HIGHLIGHT_PROVIDER,
+    CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND,
+    CHUNK_DIR,
+    JOB_DIR,
     OPENAI_HIGHLIGHT_MODEL,
     OPENAI_TRANSLATION_MODEL,
     OUTPUT_DIR,
     SHORT_CLIP_SECONDS,
+    SHORT_CLIP_COUNT,
+    TRANSCRIPTION_CHUNK_SECONDS,
     TRANSLATION_PROVIDER,
     UPLOAD_DIR,
     WHISPER_MODEL,
     WHISPER_THREADS,
     WHISPER_TIMEOUT_SECONDS,
+    USE_CELERY,
 )
 from app.routes import jobs, uploads
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+JOB_DIR.mkdir(parents=True, exist_ok=True)
+CHUNK_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Amharic-English Transcription Agent MVP")
 
@@ -64,6 +73,11 @@ def health_check() -> dict[str, str | int | bool | dict[str, str | int | bool]]:
         "openai_api_key_available": bool(os.getenv("OPENAI_API_KEY")),
         "openai_api_key_fingerprint": key_fingerprint(os.getenv("OPENAI_API_KEY")),
         "short_clip_seconds": os.getenv("SHORT_CLIP_SECONDS", str(SHORT_CLIP_SECONDS)),
+        "short_clip_count": os.getenv("SHORT_CLIP_COUNT", str(SHORT_CLIP_COUNT)),
+        "transcription_chunk_seconds": os.getenv("TRANSCRIPTION_CHUNK_SECONDS", str(TRANSCRIPTION_CHUNK_SECONDS)),
+        "use_celery": os.getenv("USE_CELERY", USE_CELERY),
+        "celery_broker_url": os.getenv("CELERY_BROKER_URL", CELERY_BROKER_URL),
+        "celery_result_backend": os.getenv("CELERY_RESULT_BACKEND", CELERY_RESULT_BACKEND),
         "highlight_provider": os.getenv("HIGHLIGHT_PROVIDER", HIGHLIGHT_PROVIDER),
         "openai_highlight_model": os.getenv("OPENAI_HIGHLIGHT_MODEL", OPENAI_HIGHLIGHT_MODEL),
     }

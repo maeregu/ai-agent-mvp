@@ -2,6 +2,8 @@ backend/.env
 backend/.venv/
 backend/uploads/
 backend/outputs/
+backend/jobs/
+backend/chunks/
 backend/server.*.log
 __pycache__/
 *.pyc

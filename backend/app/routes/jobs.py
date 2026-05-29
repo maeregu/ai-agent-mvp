@@ -14,15 +14,25 @@ def to_response(job) -> JobResponse:
         id=job.id,
         filename=job.filename,
         target_language=job.target_language,
+        clip_duration_seconds=job.clip_duration_seconds,
+        clip_count=job.clip_count,
         status=job.status,
+        progress=job.progress,
+        progress_message=job.progress_message,
         transcript=job.transcript,
         translation=job.translation,
+        highlights=job.highlights,
         highlight_start=job.highlight_start,
         highlight_end=job.highlight_end,
         highlight_reason=job.highlight_reason,
         error=job.error,
         download_url=f"/jobs/{job.id}/download" if job.output_path else None,
         short_video_url=f"/jobs/{job.id}/short-video" if job.short_video_path else None,
+        short_video_urls=[
+            f"/jobs/{job.id}/short-videos/{index}"
+            for index, path in enumerate(job.short_video_paths)
+            if path.exists()
+        ],
         created_at=job.created_at,
         updated_at=job.updated_at,
     )
@@ -50,4 +60,15 @@ def download_short_video(job_id: str) -> FileResponse:
     if job is None or job.short_video_path is None or not job.short_video_path.exists():
         raise HTTPException(status_code=404, detail="Short video not found")
     return FileResponse(job.short_video_path, filename=f"{job.id}_short.mp4", media_type="video/mp4")
+
+
+@router.get("/{job_id}/short-videos/{clip_index}")
+def download_short_video_by_index(job_id: str, clip_index: int) -> FileResponse:
+    job = job_store.get(job_id)
+    if job is None or clip_index < 0 or clip_index >= len(job.short_video_paths):
+        raise HTTPException(status_code=404, detail="Short video not found")
+    path = job.short_video_paths[clip_index]
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Short video not found")
+    return FileResponse(path, filename=f"{job.id}_short_{clip_index + 1}.mp4", media_type="video/mp4")
 

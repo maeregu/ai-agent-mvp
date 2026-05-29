@@ -193,6 +193,28 @@ textarea {
   line-height: 1.45;
 }
 
+.clip-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.clip-links a {
+  min-height: 38px;
+  border-radius: 6px;
+  background: #334155;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.clip-links a:hover {
+  background: #1f2937;
+}
+
 .hidden {
   display: none;
 }

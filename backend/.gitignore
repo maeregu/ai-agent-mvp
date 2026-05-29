@@ -1,5 +1,7 @@
 .env
 uploads/
 outputs/
+jobs/
+chunks/
 __pycache__/
 *.pyc

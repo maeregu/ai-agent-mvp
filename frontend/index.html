@@ -31,6 +31,27 @@
               </select>
             </label>
 
+            <label class="field">
+              <span>Clip duration</span>
+              <select id="clipDuration" name="clip_duration_seconds">
+                <option value="45">45 seconds</option>
+                <option value="120">2 minutes</option>
+                <option value="300">5 minutes</option>
+                <option value="1200">20 minutes</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Number of clips</span>
+              <select id="clipCount" name="clip_count">
+                <option value="1">1 clip</option>
+                <option value="2">2 clips</option>
+                <option value="3" selected>3 clips</option>
+                <option value="4">4 clips</option>
+                <option value="5">5 clips</option>
+              </select>
+            </label>
+
             <button id="submitButton" type="submit">Start transcription</button>
           </form>
         </div>
@@ -49,6 +70,7 @@
 
           <div id="errorBox" class="error hidden"></div>
           <div id="highlightBox" class="highlight hidden"></div>
+          <div id="clipLinks" class="clip-links hidden"></div>
 
           <label class="output-block">
             <span>Transcript</span>

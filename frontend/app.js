@@ -3,10 +3,13 @@ const API_BASE = "http://127.0.0.1:8000";
 const uploadForm = document.querySelector("#uploadForm");
 const fileInput = document.querySelector("#fileInput");
 const targetLanguage = document.querySelector("#targetLanguage");
+const clipDuration = document.querySelector("#clipDuration");
+const clipCount = document.querySelector("#clipCount");
 const submitButton = document.querySelector("#submitButton");
 const statusText = document.querySelector("#statusText");
 const errorBox = document.querySelector("#errorBox");
 const highlightBox = document.querySelector("#highlightBox");
+const clipLinks = document.querySelector("#clipLinks");
 const transcriptOutput = document.querySelector("#transcriptOutput");
 const translationOutput = document.querySelector("#translationOutput");
 const downloadLink = document.querySelector("#downloadLink");
@@ -30,15 +33,18 @@ function setDownload(url) {
 }
 
 function setHighlight(job) {
-  if (job.highlight_start === null || job.highlight_end === null) {
+  if (!job.highlights || job.highlights.length === 0) {
     highlightBox.textContent = "";
     highlightBox.classList.add("hidden");
     return;
   }
-  const start = Number(job.highlight_start).toFixed(1);
-  const end = Number(job.highlight_end).toFixed(1);
-  const reason = job.highlight_reason || "Selected highlight";
-  highlightBox.textContent = `Short video: ${start}s to ${end}s. ${reason}`;
+  const lines = job.highlights.map((highlight, index) => {
+    const start = Number(highlight.start).toFixed(1);
+    const end = Number(highlight.end).toFixed(1);
+    const reason = highlight.reason || "Selected highlight";
+    return `Clip ${index + 1}: ${start}s to ${end}s. ${reason}`;
+  });
+  highlightBox.textContent = lines.join("\n");
   highlightBox.classList.remove("hidden");
 }
 
@@ -52,14 +58,33 @@ function setShortVideo(url) {
   shortVideoLink.classList.remove("hidden");
 }
 
+function setClipLinks(urls) {
+  clipLinks.innerHTML = "";
+  if (!urls || urls.length === 0) {
+    clipLinks.classList.add("hidden");
+    return;
+  }
+  urls.forEach((url, index) => {
+    const link = document.createElement("a");
+    link.href = `${API_BASE}${url}`;
+    link.target = "_blank";
+    link.textContent = `Download clip ${index + 1}`;
+    clipLinks.appendChild(link);
+  });
+  clipLinks.classList.remove("hidden");
+}
+
 function renderJob(job) {
   statusText.textContent =
-    job.status === "processing" ? "processing with low CPU mode" : job.status;
+    job.status === "processing"
+      ? `${job.progress || 0}% - ${job.progress_message || "Processing"}`
+      : job.status;
   transcriptOutput.value = job.transcript || "";
   translationOutput.value =
     job.translation || (job.error && job.transcript ? "Translation failed. Transcript is still available above." : "");
   setDownload(job.download_url);
   setShortVideo(job.short_video_url);
+  setClipLinks(job.short_video_urls);
   setHighlight(job);
   setError(job.error);
 
@@ -99,6 +124,7 @@ uploadForm.addEventListener("submit", async (event) => {
   setError("");
   setDownload("");
   setShortVideo("");
+  setClipLinks([]);
   highlightBox.textContent = "";
   highlightBox.classList.add("hidden");
   transcriptOutput.value = "";
@@ -108,6 +134,8 @@ uploadForm.addEventListener("submit", async (event) => {
   const formData = new FormData();
   formData.append("file", fileInput.files[0]);
   formData.append("target_language", targetLanguage.value);
+  formData.append("clip_duration_seconds", clipDuration.value);
+  formData.append("clip_count", clipCount.value);
 
   submitButton.disabled = true;
   submitButton.textContent = "Uploading...";

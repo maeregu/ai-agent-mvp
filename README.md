@@ -8,6 +8,10 @@ This is a market-test MVP for an Ethiopian audio/video transcription agent. It s
 - transcript display
 - optional translation display
 - short video clip generation for uploaded videos
+- custom clip durations: 45 seconds, 2 minutes, 5 minutes, or 20 minutes
+- multiple highlight clips per video
+- progress/status percentage
+- optional Celery + Redis worker mode for long jobs
 - text download
 
 The current code has clean adapters for transcription and translation. By default it uses local Whisper, which also requires FFmpeg. Set `TRANSCRIPTION_PROVIDER=demo` only when you want placeholder transcripts for product-flow testing.
@@ -34,6 +38,8 @@ backend/
       tasks.py
   uploads/
   outputs/
+  jobs/
+  chunks/
   requirements.txt
   .env.example
 
@@ -129,18 +135,62 @@ Default behavior:
 - uses Whisper timestamp segments
 - asks OpenAI to choose the strongest highlight when API quota is available
 - falls back to local highlight scoring when OpenAI is unavailable
-- exports an `.mp4`
-- shows a **Short video** download button after processing
+- exports one or more `.mp4` clips
+- supports 45 seconds, 2 minutes, 5 minutes, and 20 minutes
+- shows clip download buttons after processing
 
 Change duration in `backend/.env`:
 
 ```text
 SHORT_CLIP_SECONDS=45
+SHORT_CLIP_COUNT=3
 HIGHLIGHT_PROVIDER=openai
 OPENAI_HIGHLIGHT_MODEL=gpt-5-mini
 ```
 
 If OpenAI quota/billing is not active, the app still creates a short clip using local scoring over the timestamped transcript.
+
+## Long Job Worker Mode
+
+For 2-3 hour videos, use Redis + Celery instead of FastAPI's local background task.
+
+Install requirements:
+
+```powershell
+cd backend
+python -m pip install -r requirements.txt
+```
+
+Start Redis. On Windows, the simplest path is usually Docker Desktop:
+
+```powershell
+docker run --name ai-agent-redis -p 6379:6379 redis:7
+```
+
+Set worker mode in `backend/.env`:
+
+```text
+USE_CELERY=true
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/1
+TRANSCRIPTION_CHUNK_SECONDS=1200
+```
+
+Start the Celery worker in one terminal:
+
+```powershell
+cd backend
+celery -A app.workers.celery_app.celery_app worker --pool=solo --loglevel=info
+```
+
+Start FastAPI in another terminal:
+
+```powershell
+cd backend
+uvicorn app.main:app --reload
+```
+
+The app still works without Celery. If `USE_CELERY=false`, uploads run with FastAPI's local background task.
 
 ## Next Market Features
 
